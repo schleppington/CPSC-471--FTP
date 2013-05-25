@@ -172,6 +172,35 @@ def main(port):
 
             elif cmdinfo['cmd'] == "put":
                 print "put command"
+                print dataSocket
+                f = open(cmdinfo['filename'], 'w')
+                print f
+                s="connecting"
+                sendData(dataSocket, s)
+                size = recvSize(dataSocket)
+                print size
+                
+                chunkSize = 100
+                bytesRecvd = 0
+                
+                while (bytesRecvd < size):
+                    # By default receive chunkSize bytes
+                    numToRecv = chunkSize
+                    
+                    # Is this the last chunk?
+                    if size - bytesRecvd < chunkSize:
+                        numToRecv = size - bytesRecvd
+                        print numToRecv
+                        # Receive the amount of data
+                        data = recvData(dataSocket, numToRecv)
+                        print data
+                        # Save the data
+                        f.write(data)
+                        
+                        # Update the total number of bytes received
+                        bytesRecvd += len(data)
+                # Transfer complete, close the file.
+                f.close()
 
             elif cmdinfo['cmd'] == "get":
                 print "get command"

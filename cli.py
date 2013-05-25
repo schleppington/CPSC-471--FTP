@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, os
 import socket
 
 # The length of the length string for sending files
@@ -266,11 +266,30 @@ def main(server, port):
 
         elif cmd[0:3] == 'put':
             filename = cmd[4:]
-            sockinfo = openDataSocket()
-            datasock = sockinfo[0]
-            dataport = sockinfo[1]
-            strcmd = getCmdStr(port, 'put', filename)
-            sendData(cmdSocket, strcmd)
+            file=open(filename)
+            if file:
+                datasock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                datasock.bind(('',0))
+                addr = datasock.getsockname()
+                dataport = addr[1]
+                datasock.listen(1)
+                strcmd = getCmdStr(dataport, 'put', filename)
+                sendData(cmdSocket, strcmd)
+                client, address = datasock.accept()
+                print client
+                print address
+                recvData(datasock, 47)
+                print "sent data"
+                print client
+                print address
+                datasock.send(str(os.stat(filename).st_size))
+                sendSize(datasock, os.stat(filename).st_size)
+                sendData(datasock, file.read())
+            
+            else:
+                print "Please enter a valid filename"
+            file.close()
+
             
         elif cmd[0:4] == 'quit':
             cmdSocket.close()
